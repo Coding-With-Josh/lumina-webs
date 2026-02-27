@@ -147,9 +147,6 @@ export default function Home() {
     const container = containerRef.current;
     if (!container) return;
 
-    // #region agent log H1
-    fetch("http://127.0.0.1:7891/ingest/8975e8fa-ec06-412d-a4d6-99b60de7e373", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "5aed87" }, body: JSON.stringify({ sessionId: "5aed87", runId: "post-fix", hypothesisId: "H1", location: "app/page.tsx:136", message: "FAQ markers in html strings", data: { htmlHasFaqSection: html.includes('id="faqs"'), patchedHasFaqSection: patchedHtml.includes('id="faqs"'), htmlHasFaqHeading: html.includes("Some Common FAQs"), patchedHasFaqHeading: patchedHtml.includes("Some Common FAQs"), htmlHasFaqContainerClass: html.includes("framer-10y28p-container"), patchedHasFaqContainerClass: patchedHtml.includes("framer-10y28p-container") }, timestamp: Date.now() }) }).catch(() => {});
-    // #endregion
 
     // Override Framer's display:contents on all icon containers
     const styleOverride = document.createElement("style");
@@ -234,42 +231,43 @@ export default function Home() {
       injectSvg(el, socialSvgs[i % socialSvgs.length]);
     });
 
-    // #region agent log H11
-    const iconStatsNow = {
-      featureTotal: container.querySelectorAll(".framer-5kqs5r-container").length,
-      featureWithSvg: container.querySelectorAll(".framer-5kqs5r-container svg").length,
-      platformTotal: container.querySelectorAll(".framer-onwvax-container").length,
-      platformWithSvg: container.querySelectorAll(".framer-onwvax-container svg").length,
-      faqChevronTotal: container.querySelectorAll(".framer-gklm8n-container").length,
-      faqChevronWithSvg: container.querySelectorAll(".framer-gklm8n-container svg").length,
-      socialTotal: container.querySelectorAll(".framer-19lr1bc-container").length,
-      socialWithSvg: container.querySelectorAll(".framer-19lr1bc-container svg").length,
-    };
-    fetch("http://127.0.0.1:7891/ingest/8975e8fa-ec06-412d-a4d6-99b60de7e373", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "5aed87" }, body: JSON.stringify({ sessionId: "5aed87", runId: "icons-run1", hypothesisId: "H11", location: "app/page.tsx:236", message: "Icon stats right after injection", data: iconStatsNow, timestamp: Date.now() }) }).catch(() => {});
-    // #endregion
 
     const getBenefitsCardGrid = () =>
       container.querySelector<HTMLElement>("#benefits .framer-pqlypm[data-framer-name='section']") ||
       container.querySelector<HTMLElement>("#benefits [data-framer-name='section']");
 
-    // #region agent log H9
-    const sectionCandidates = Array.from(container.querySelectorAll<HTMLElement>("#benefits [data-framer-name='section']"));
-    fetch("http://127.0.0.1:7891/ingest/8975e8fa-ec06-412d-a4d6-99b60de7e373", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "5aed87" }, body: JSON.stringify({ sessionId: "5aed87", runId: "features-run2", hypothesisId: "H9", location: "app/page.tsx:238", message: "Benefits section selector candidates", data: { sectionCount: sectionCandidates.length, classes: sectionCandidates.map((el) => el.className).slice(0, 6) }, timestamp: Date.now() }) }).catch(() => {});
-    // #endregion
+    let centerLogCount = 0;
+    const emitCenterLog = (hypothesisId: string, message: string, data: Record<string, unknown>) => {
+      if (centerLogCount >= 8) return;
+      centerLogCount += 1;
+      // #region agent log CENTER
+      fetch("http://127.0.0.1:7891/ingest/8975e8fa-ec06-412d-a4d6-99b60de7e373", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "5aed87" }, body: JSON.stringify({ sessionId: "5aed87", runId: "center-debug-1", hypothesisId, location: "app/page.tsx:centerBenefitsGrid", message, data, timestamp: Date.now() }) }).catch(() => {});
+      // #endregion
+    };
+
 
     // Keep benefits card grid visually centered in viewport.
-    const centerBenefitsGrid = () => {
+    const centerBenefitsGrid = (source: string) => {
       const grid = getBenefitsCardGrid();
-      if (!grid) return;
+      if (!grid) {
+        emitCenterLog("C2", "Center skipped: grid missing", { source });
+        return;
+      }
       // Measure from layout position (without prior translateX) to avoid oscillation.
       const previousTransform = grid.style.transform;
       grid.style.setProperty("transform", "none", "important");
       const rect = grid.getBoundingClientRect();
       const delta = (rect.left + rect.width / 2) - (window.innerWidth / 2);
       grid.style.setProperty("transform", `translateX(${-delta}px)`, "important");
-      // #region agent log H7
-      fetch("http://127.0.0.1:7891/ingest/8975e8fa-ec06-412d-a4d6-99b60de7e373", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "5aed87" }, body: JSON.stringify({ sessionId: "5aed87", runId: "features-run2", hypothesisId: "H7", location: "app/page.tsx:248", message: "Applied benefits centering translation", data: { targetClass: grid.className, beforeDelta: delta, appliedTranslateX: -delta, parentTransform: grid.parentElement ? getComputedStyle(grid.parentElement).transform : null }, timestamp: Date.now() }) }).catch(() => {});
-      // #endregion
+      emitCenterLog("C1", "Center applied", {
+        source,
+        targetClass: grid.className,
+        viewportWidth: window.innerWidth,
+        gridLeft: rect.left,
+        gridWidth: rect.width,
+        beforeDelta: delta,
+        appliedTranslateX: -delta,
+      });
       if (!grid.style.transform && previousTransform) {
         grid.style.transform = previousTransform;
       }
@@ -294,11 +292,11 @@ export default function Home() {
           child.style.display = shouldHide ? 'none' : '';
         });
       });
-      centerBenefitsGrid();
+      centerBenefitsGrid("applyBreakpoints");
     };
     applyBreakpoints();
     window.addEventListener('resize', applyBreakpoints);
-    requestAnimationFrame(centerBenefitsGrid);
+    requestAnimationFrame(() => centerBenefitsGrid("initialRAF"));
 
     // Fix left-shift: root has inline display:contents + width:auto — force block + full width
     const root = container.querySelector<HTMLElement>('[data-framer-root]');
@@ -316,87 +314,21 @@ export default function Home() {
       layoutTemplate.style.setProperty('max-width', 'none', 'important');
     }
     // Re-center after root/template geometry is finalized.
-    centerBenefitsGrid();
-    requestAnimationFrame(centerBenefitsGrid);
-    requestAnimationFrame(() => requestAnimationFrame(centerBenefitsGrid));
+    centerBenefitsGrid("afterRootLayoutFix");
+    requestAnimationFrame(() => centerBenefitsGrid("afterRootLayoutFixRAF1"));
+    requestAnimationFrame(() => requestAnimationFrame(() => centerBenefitsGrid("afterRootLayoutFixRAF2")));
 
-    // #region agent log H12
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const iconStatsAfterPaint = {
-          featureTotal: container.querySelectorAll(".framer-5kqs5r-container").length,
-          featureWithSvg: container.querySelectorAll(".framer-5kqs5r-container svg").length,
-          platformTotal: container.querySelectorAll(".framer-onwvax-container").length,
-          platformWithSvg: container.querySelectorAll(".framer-onwvax-container svg").length,
-          socialTotal: container.querySelectorAll(".framer-19lr1bc-container").length,
-          socialWithSvg: container.querySelectorAll(".framer-19lr1bc-container svg").length,
-        };
-        fetch("http://127.0.0.1:7891/ingest/8975e8fa-ec06-412d-a4d6-99b60de7e373", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "5aed87" }, body: JSON.stringify({ sessionId: "5aed87", runId: "icons-run1", hypothesisId: "H12", location: "app/page.tsx:313", message: "Icon stats after post-load layout", data: iconStatsAfterPaint, timestamp: Date.now() }) }).catch(() => {});
-      });
-    });
-    // #endregion
-
-    // #region agent log H2
-    fetch("http://127.0.0.1:7891/ingest/8975e8fa-ec06-412d-a4d6-99b60de7e373", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "5aed87" }, body: JSON.stringify({ sessionId: "5aed87", runId: "post-fix", hypothesisId: "H2", location: "app/page.tsx:259", message: "FAQ presence in DOM on mount", data: { hasFaqSectionById: !!container.querySelector("#faqs"), hasFaqContainerClass: !!container.querySelector(".framer-10y28p-container"), faqHeadingFound: !!Array.from(container.querySelectorAll("h1,h2,h3,p,div")).find((el) => (el.textContent || "").includes("Some Common FAQs")) }, timestamp: Date.now() }) }).catch(() => {});
-    // #endregion
-
-    // #region agent log H3
-    requestAnimationFrame(() => {
-      fetch("http://127.0.0.1:7891/ingest/8975e8fa-ec06-412d-a4d6-99b60de7e373", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "5aed87" }, body: JSON.stringify({ sessionId: "5aed87", runId: "post-fix", hypothesisId: "H3", location: "app/page.tsx:264", message: "FAQ presence after first paint", data: { hasFaqSectionById: !!container.querySelector("#faqs"), hasFaqContainerClass: !!container.querySelector(".framer-10y28p-container"), faqHeadingFound: !!Array.from(container.querySelectorAll("h1,h2,h3,p,div")).find((el) => (el.textContent || "").includes("Some Common FAQs")) }, timestamp: Date.now() }) }).catch(() => {});
-    });
-    // #endregion
-
-    // #region agent log H4
-    const benefitsSection = container.querySelector<HTMLElement>("#benefits");
-    const framerRoot = container.querySelector<HTMLElement>("[data-framer-root]");
-    const mainEl = container.querySelector<HTMLElement>("#main");
-    if (benefitsSection && framerRoot && mainEl) {
-      const br = benefitsSection.getBoundingClientRect();
-      const rr = framerRoot.getBoundingClientRect();
-      const mr = mainEl.getBoundingClientRect();
-      fetch("http://127.0.0.1:7891/ingest/8975e8fa-ec06-412d-a4d6-99b60de7e373", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "5aed87" }, body: JSON.stringify({ sessionId: "5aed87", runId: "features-run1", hypothesisId: "H4", location: "app/page.tsx:286", message: "Root and benefits geometry", data: { viewportWidth: window.innerWidth, main: { left: mr.left, width: mr.width }, root: { left: rr.left, width: rr.width }, benefits: { left: br.left, width: br.width }, benefitsCenterDelta: (br.left + br.width / 2) - (window.innerWidth / 2) }, timestamp: Date.now() }) }).catch(() => {});
-    }
-    // #endregion
-
-    // #region agent log H5
-    const benefitsGrid = getBenefitsCardGrid();
-    const visibleCards = Array.from(container.querySelectorAll<HTMLElement>("#benefits .framer-9tv39u-container, #benefits .framer-10kbevl-container, #benefits .framer-x6twm-container, #benefits .framer-10vi2dn-container, #benefits .framer-j7hvcg-container, #benefits .framer-vb1v9g-container")).filter((el) => getComputedStyle(el).display !== "none");
-    if (benefitsGrid) {
-      const gr = benefitsGrid.getBoundingClientRect();
-      fetch("http://127.0.0.1:7891/ingest/8975e8fa-ec06-412d-a4d6-99b60de7e373", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "5aed87" }, body: JSON.stringify({ sessionId: "5aed87", runId: "features-run2", hypothesisId: "H5", location: "app/page.tsx:307", message: "Benefits grid and card visibility", data: { targetClass: benefitsGrid.className, gridLeft: gr.left, gridWidth: gr.width, gridCenterDelta: (gr.left + gr.width / 2) - (window.innerWidth / 2), visibleCardsCount: visibleCards.length, firstCardLeft: visibleCards[0]?.getBoundingClientRect().left ?? null }, timestamp: Date.now() }) }).catch(() => {});
-    }
-    // #endregion
-
-    // #region agent log H6
-    requestAnimationFrame(() => {
-      const gridAfterPaint = getBenefitsCardGrid();
-      const visibleVariants = Array.from(container.querySelectorAll<HTMLElement>("#benefits .ssr-variant")).filter((el) => getComputedStyle(el).display !== "none").length;
-      fetch("http://127.0.0.1:7891/ingest/8975e8fa-ec06-412d-a4d6-99b60de7e373", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "5aed87" }, body: JSON.stringify({ sessionId: "5aed87", runId: "features-run2", hypothesisId: "H6", location: "app/page.tsx:316", message: "Post-paint benefits alignment state", data: { targetClass: gridAfterPaint?.className ?? null, visibleVariants, gridExists: !!gridAfterPaint, gridCenterDelta: gridAfterPaint ? (gridAfterPaint.getBoundingClientRect().left + gridAfterPaint.getBoundingClientRect().width / 2) - (window.innerWidth / 2) : null }, timestamp: Date.now() }) }).catch(() => {});
-    });
-    // #endregion
-
-    // #region agent log H8
-    requestAnimationFrame(() => {
-      const gridAfterFix = getBenefitsCardGrid();
-      fetch("http://127.0.0.1:7891/ingest/8975e8fa-ec06-412d-a4d6-99b60de7e373", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "5aed87" }, body: JSON.stringify({ sessionId: "5aed87", runId: "features-run2", hypothesisId: "H8", location: "app/page.tsx:324", message: "Benefits alignment after centering", data: { targetClass: gridAfterFix?.className ?? null, gridExists: !!gridAfterFix, inlineTransform: gridAfterFix?.style.transform ?? null, computedTransform: gridAfterFix ? getComputedStyle(gridAfterFix).transform : null, gridCenterDelta: gridAfterFix ? (gridAfterFix.getBoundingClientRect().left + gridAfterFix.getBoundingClientRect().width / 2) - (window.innerWidth / 2) : null }, timestamp: Date.now() }) }).catch(() => {});
-    });
-    // #endregion
-
-    // #region agent log H10
-    const benefitsMutationObserver = new MutationObserver(() => {
-      const grid = getBenefitsCardGrid();
-      if (!grid) return;
-      centerBenefitsGrid();
-      fetch("http://127.0.0.1:7891/ingest/8975e8fa-ec06-412d-a4d6-99b60de7e373", { method: "POST", headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "5aed87" }, body: JSON.stringify({ sessionId: "5aed87", runId: "features-run2", hypothesisId: "H10", location: "app/page.tsx:331", message: "Benefits DOM mutation state", data: { inlineTransform: grid.style.transform || null, computedTransform: getComputedStyle(grid).transform, gridCenterDelta: (grid.getBoundingClientRect().left + grid.getBoundingClientRect().width / 2) - (window.innerWidth / 2) }, timestamp: Date.now() }) }).catch(() => {});
-    });
     const benefitsRoot = container.querySelector<HTMLElement>("#benefits");
-    if (benefitsRoot) benefitsMutationObserver.observe(benefitsRoot, { attributes: true, childList: true, subtree: true, attributeFilter: ["style", "class"] });
-    // #endregion
-
-    const benefitsResizeObserver = new ResizeObserver(() => {
-      centerBenefitsGrid();
-    });
-    if (benefitsRoot) benefitsResizeObserver.observe(benefitsRoot);
+    let benefitsResizeObserver: ResizeObserver | null = null;
+    if (benefitsRoot) {
+      benefitsResizeObserver = new ResizeObserver(() => {
+        centerBenefitsGrid("benefitsResizeObserver");
+      });
+      benefitsResizeObserver.observe(benefitsRoot);
+      emitCenterLog("C3", "Resize observer attached", { source: "setup", hasBenefitsRoot: true });
+    } else {
+      emitCenterLog("C3", "Resize observer not attached", { source: "setup", hasBenefitsRoot: false });
+    }
 
     /* FAQ section commented out in HTML — runtime fix disabled
     // FAQ: force question/answer text to flow normally (override Framer's 1px + flex column)
@@ -472,8 +404,7 @@ export default function Home() {
 
     return () => {
       window.removeEventListener('resize', applyBreakpoints);
-      benefitsMutationObserver.disconnect();
-      benefitsResizeObserver.disconnect();
+      benefitsResizeObserver?.disconnect();
       // clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); clearTimeout(t5); clearTimeout(t6); clearTimeout(t7);
       // if (faqFixScheduled) clearTimeout(faqFixScheduled); observer.disconnect();
     };
