@@ -12,6 +12,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const ogImageUrl =
+  "https://framerusercontent.com/images/wXaVNAZznjKEounnLizAEvhRAE.png?width=1763&height=1176";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://luminaweb3.io"),
   title:
@@ -44,12 +47,21 @@ export const metadata: Metadata = {
     title: "Lumina Web3 - Marketing Agency",
     description: "Lumina Web3 - Marketing Agency",
     siteName: "Lumina Web3",
+    images: [
+      {
+        url: ogImageUrl,
+        width: 1763,
+        height: 1176,
+        alt: "Lumina Web3 - Marketing Agency",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Lumina Web3 - Marketing Agency",
     description: "Lumina Web3 - Marketing Agency",
     site: "https://x.com/luminaweb3_io",
+    images: [ogImageUrl],
   },
   icons: {
     icon: [
