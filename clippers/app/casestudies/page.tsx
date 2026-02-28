@@ -1,29 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const LIVE_CASES_URL = "https://luminaclippers.com/casestudies";
 
 export default function CaseStudiesPage() {
   const [iframeBlocked, setIframeBlocked] = useState(false);
-
-  useEffect(() => {
-    // #region agent log CASE-H1
-    fetch("http://127.0.0.1:7891/ingest/8975e8fa-ec06-412d-a4d6-99b60de7e373", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "5aed87" },
-      body: JSON.stringify({
-        sessionId: "5aed87",
-        runId: "case-iframe",
-        hypothesisId: "CASE-H1",
-        location: "app/casestudies/page.tsx:useEffect",
-        message: "Case studies page mounted",
-        data: { path: window.location.pathname, target: LIVE_CASES_URL },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
-  }, []);
 
   return (
     <main style={{ minHeight: "100vh", background: "#000" }}>
@@ -31,40 +13,8 @@ export default function CaseStudiesPage() {
         title="Lumina Case Studies"
         src={LIVE_CASES_URL}
         style={{ width: "100%", height: "100vh", border: 0, display: "block" }}
-        onLoad={() => {
-          // #region agent log CASE-H2
-          fetch("http://127.0.0.1:7891/ingest/8975e8fa-ec06-412d-a4d6-99b60de7e373", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "5aed87" },
-            body: JSON.stringify({
-              sessionId: "5aed87",
-              runId: "case-iframe",
-              hypothesisId: "CASE-H2",
-              location: "app/casestudies/page.tsx:iframeOnLoad",
-              message: "Case studies iframe loaded",
-              data: { target: LIVE_CASES_URL },
-              timestamp: Date.now(),
-            }),
-          }).catch(() => {});
-          // #endregion
-        }}
         onError={() => {
           setIframeBlocked(true);
-          // #region agent log CASE-H3
-          fetch("http://127.0.0.1:7891/ingest/8975e8fa-ec06-412d-a4d6-99b60de7e373", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "5aed87" },
-            body: JSON.stringify({
-              sessionId: "5aed87",
-              runId: "case-iframe",
-              hypothesisId: "CASE-H3",
-              location: "app/casestudies/page.tsx:iframeOnError",
-              message: "Case studies iframe failed to load",
-              data: { target: LIVE_CASES_URL },
-              timestamp: Date.now(),
-            }),
-          }).catch(() => {});
-          // #endregion
         }}
       />
 
