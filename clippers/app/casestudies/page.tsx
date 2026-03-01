@@ -1,46 +1,55 @@
-"use client";
+import type { Metadata } from "next";
 
-import { useState } from "react";
+export const metadata: Metadata = {
+  title: "Lumina Clippers Case Studies: See How We Drive Views for Brands",
+  description:
+    "Lumina Clippers: Drive views & engagement with our case studies. We create high-impact content for TikTok, Reels, X, & Shorts. See how we help brands grow.",
+  keywords: [
+    "content distribution",
+    "video marketing",
+    "social media engagement",
+    "case studies",
+    "brand visibility",
+    "Lumina Clippers",
+    "video content creation",
+    "social media strategy",
+  ],
+  alternates: {
+    canonical: "/casestudies",
+  },
+  openGraph: {
+    type: "website",
+    url: "/casestudies",
+    title: "Lumina Clippers — The Clipping Network for Brands",
+    description:
+      "We mobilize 10,000+ clippers to clip and mass-distribute your content across TikTok, Reels, X, and Shorts. Built for brands, AI products, apps, and crypto.",
+    images: [
+      {
+        url: "https://framerusercontent.com/images/49d9V2C17jyhAnna9CVX16sCjZA.png",
+        alt: "Lumina Clippers — The Clipping Network for Brands",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Lumina Clippers — The Clipping Network for Brands",
+    description:
+      "Boost brand visibility with 10,000+ clippers! Mass-distribute content across TikTok, Reels, X & Shorts. #ContentDistribution",
+    images: [
+      "https://framerusercontent.com/images/49d9V2C17jyhAnna9CVX16sCjZA.png",
+    ],
+  },
+};
 
-const LIVE_CASES_URL = "https://luminaclippers.com/casestudies";
-
-export default function CaseStudiesPage() {
-  const [iframeBlocked, setIframeBlocked] = useState(false);
-
-  return (
-    <main style={{ minHeight: "100vh", background: "#000" }}>
-      <iframe
-        title="Lumina Case Studies"
-        src={LIVE_CASES_URL}
-        style={{ width: "100%", height: "100vh", border: 0, display: "block" }}
-        onError={() => {
-          setIframeBlocked(true);
-        }}
-      />
-
-      {iframeBlocked ? (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            display: "grid",
-            placeItems: "center",
-            background: "rgba(0,0,0,0.9)",
-            color: "#fff",
-            zIndex: 30,
-            padding: 24,
-            textAlign: "center",
-          }}
-        >
-          <div>
-            <p style={{ margin: 0, fontSize: 18 }}>Could not embed case studies.</p>
-            <a href={LIVE_CASES_URL} target="_blank" rel="noreferrer" style={{ color: "rgb(80,217,121)" }}>
-              Open the live case studies page
-            </a>
-          </div>
-        </div>
-      ) : null}
-    </main>
-  );
-}
-// 
+export default function CaseStudies() {
+    return (
+      <main style={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
+        <iframe
+          title="Case Studies - Lumina Clippers Website"
+          src="/casestudies.html"
+          style={{ width: "100%", height: "100%", border: "0" }}
+        />
+      </main>
+    );
+  }
+  
